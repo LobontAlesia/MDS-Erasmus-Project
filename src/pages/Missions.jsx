@@ -26,7 +26,8 @@ export default function Missions() {
             {d.completed.map((done, i) => (
               <p key={i} className={`small checklist-item ${done ? 'done' : ''}`}>
                 <span className="dot" aria-hidden="true">{done && <Icon name="check" />}</span>
-                Mission {i + 1}: {done ? 'complete' : 'not started'}
+                Mission {i + 1}:{' '}
+                {done ? 'complete' : d.perMission[i] > 0 ? `in progress (${d.perMission[i]}%)` : 'not started'}
               </p>
             ))}
           </div>
