@@ -47,11 +47,45 @@ export const ROLES = [
   },
 ];
 
+// Practice cards for Mission 2 (US-08): `how` and `sources` are shown when a card is opened
 export const PRACTICES = [
-  { title: 'Planning Poker', tag: 'Sprint Planning', text: 'Estimate stories with cards to discuss effort and uncertainty.' },
-  { title: 'Speed Boat retro', tag: 'Retrospective', text: 'Invite everyone to identify what moves the team forward and what holds it back.' },
-  { title: 'Burndown as a level bar', tag: 'Sprint tracking', text: 'Visualize remaining work as a game-style progress bar.' },
-  { title: 'Team badges', tag: 'Definition of Done', text: 'Celebrate shared milestones rather than rewarding individuals only.' },
+  {
+    title: 'Planning Poker',
+    tag: 'Sprint Planning',
+    text: 'Estimate stories with cards to discuss effort and uncertainty.',
+    how: 'Planning Poker is a collaborative estimation technique in which team members independently choose an estimate for a user story and reveal their cards simultaneously. If estimates differ, participants discuss their reasoning and work toward a shared understanding. This approach encourages participation and reduces the influence of dominant team members.',
+    sources: [
+      { text: 'Grenning, J. W. (2002). Planning Poker or How to Avoid Analysis Paralysis While Release Planning.', url: 'https://wingman-sw.com/papers/PlanningPoker-v1.1.pdf' },
+    ],
+  },
+  {
+    title: 'Speed Boat retro',
+    tag: 'Retrospective',
+    text: 'Invite everyone to identify what moves the team forward and what holds it back.',
+    how: "Speed Boat is a visual activity adapted for Sprint Retrospectives, where the boat represents the team's progress and anchors represent obstacles slowing it down. Team members identify and discuss these obstacles to understand what prevents them from moving forward. The activity helps the team reflect on challenges and identify opportunities for improvement.",
+    sources: [
+      { text: 'Hohmann, L. (2006). Innovation Games: Creating Breakthrough Products Through Collaborative Play. Addison-Wesley.', url: '' },
+    ],
+  },
+  {
+    title: 'Burndown as a level bar',
+    tag: 'Sprint tracking',
+    text: 'Visualize remaining work as a game-style progress bar.',
+    how: 'A Sprint burndown chart tracks the amount of work remaining throughout a Sprint, helping teams monitor progress toward their Sprint Goal. Sprint Quest adapts this concept into a game-style level bar to make progress easier to visualize. Unlike a traditional burndown chart, which tracks remaining work, the level bar can represent completed work.',
+    sources: [
+      { text: 'Atlassian. What is the Sprint Burndown Report?', url: 'https://support.atlassian.com/jira-software-cloud/docs/what-is-the-sprint-burndown-report/' },
+    ],
+  },
+  {
+    title: 'Team badges',
+    tag: 'Definition of Done',
+    text: 'Celebrate shared milestones rather than rewarding individuals only.',
+    how: 'Team Badges are an optional gamification technique used to recognize collective achievements, such as completing a Sprint Goal or reaching a shared milestone. Badges are commonly used in gamified systems as visual representations of achievements. In Sprint Quest, teams can earn badges when they meet predefined objectives, which may encourage collaboration and recognition of shared accomplishments. Team Badges are not an official Scrum practice.',
+    sources: [
+      { text: 'Deterding, S., Dixon, D., Khaled, R., & Nacke, L. (2011). From Game Design Elements to Gamefulness: Defining Gamification. Proceedings of the 15th International Academic MindTrek Conference, 9-15.', url: 'https://doi.org/10.1145/2181037.2181040' },
+      { text: 'Schwaber, K., & Sutherland, J. (2020). The Scrum Guide: The Definitive Guide to Scrum.', url: 'https://scrumguides.org/scrum-guide.html' },
+    ],
+  },
 ];
 
 export const QUESTIONS = [
