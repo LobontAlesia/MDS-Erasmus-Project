@@ -48,6 +48,12 @@ body {
   line-height: 1.5;
 }
 
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
 button, input { font: inherit; }
 button { cursor: pointer; }
 
@@ -193,7 +199,7 @@ nav {
   width: 100%;
   max-width: 1180px;
   margin: 0 auto;
-  padding: 44px 25px 72px;
+  padding: 28px 25px 72px;
 }
 .container:focus { outline: none; }
 
@@ -311,7 +317,7 @@ h2.card-title { font-size: 22px; margin: 1em 0 .7em; }
   font-weight: 600;
   font-size: 15px;
   padding: 0;
-  margin-bottom: 22px;
+  margin-bottom: 14px;
 }
 .back:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; }
 .back + .eyebrow { display: table; }
@@ -670,28 +676,31 @@ h2.card-title { font-size: 22px; margin: 1em 0 .7em; }
 }
 
 @media (max-width: 850px) {
-  .navinner { flex-wrap: wrap; gap: 8px; padding: 10px 15px 0; }
+  .navinner { flex-wrap: wrap; gap: 6px 10px; padding: 10px 15px 6px; }
   .brand { margin-right: auto; }
   /* flex-basis 100% (not just width:100%) so the links really get their own row */
   .links {
     order: 3;
     flex: 1 1 100%;
+    flex-wrap: wrap;
     justify-content: flex-start;
-    overflow-x: auto;
-    scrollbar-width: none;
-    margin: 0 -15px;
-    padding: 2px 15px 6px;
+    gap: 2px 4px;
+    padding: 4px 0 2px;
+    border-top: 1px dashed var(--line-strong);
   }
-  .links::-webkit-scrollbar { display: none; }
-  .links button { white-space: nowrap; }
+  .links button {
+    white-space: nowrap;
+    padding: 8px 10px;
+    font-size: 14px;
+  }
 
   /* minmax(0,1fr) stops long content from pushing cards past the screen edge */
   .hero, .side-grid, .dash-grid, .poker-grid, .chat-grid, .topics { grid-template-columns: minmax(0, 1fr); }
-  .hero { gap: 34px; }
+  .hero { gap: 28px; margin-top: 0; }
   .dashboard-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .tracker { min-width: 0; }
-  .container { padding: 28px 16px 48px; }
-  .section-head { margin-top: 48px; }
+  .container { padding: 18px 16px 48px; }
+  .section-head { margin-top: 36px; }
   .footer-inner { padding: 18px 16px; }
 }
 
@@ -700,7 +709,8 @@ h2.card-title { font-size: 22px; margin: 1em 0 .7em; }
   .missions, #missionList, .practice-grid { grid-template-columns: minmax(0, 1fr); }
   .mission { min-height: 0; }
   .badge-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .hero h1 { font-size: 46px; }
+  .card { padding: 18px; }
+  .hero h1 { font-size: 42px; margin: 6px 0 16px; }
   .hero p { font-size: 16px; }
   h2, .section-head h2 { font-size: 27px; }
   .board { padding: 12px 12px 0; }
@@ -709,11 +719,11 @@ h2.card-title { font-size: 22px; margin: 1em 0 .7em; }
   .mini { font-size: 13px; padding: 6px; }
   .quote-text { font-size: 22px; }
 
-  .dashboard-stats { gap: 10px; }
-  .big-number { font-size: 30px; }
-  .question { padding: 22px; }
+  .dashboard-stats { gap: 10px; margin: 20px 0; }
+  .big-number { font-size: 28px; }
+  .question { padding: 20px; }
   .question-text { font-size: 22px; }
-  .chat { height: 440px; }
+  .chat { height: 420px; }
   .bubble { max-width: 90%; }
   .estimate-buttons button { width: 54px; height: 76px; font-size: 23px; }
   .toast { left: 16px; right: 16px; bottom: 16px; }
@@ -721,9 +731,12 @@ h2.card-title { font-size: 22px; margin: 1em 0 .7em; }
 
 /* Mobile improvements: one-row header on phones, 44px touch targets on touch screens */
 @media (max-width: 530px) {
-  .navinner { gap: 6px 12px; }
+  .navinner { gap: 6px 10px; padding: 10px 12px 4px; }
   .brand { font-size: 19px; gap: 7px; }
   .level-pill { font-size: 15px; }
+  .links { justify-content: space-between; gap: 2px; }
+  .links button { padding: 7px 5px; font-size: 13px; font-stretch: 88%; }
+  .links button[aria-current="page"]::after { left: 4px; right: 4px; bottom: 1px; }
   /* two-button rows (quiz Previous / Next) share the width instead of wrapping */
   .buttonrow.row { flex-wrap: nowrap; gap: 10px; }
   .buttonrow.row .button { flex: 1 1 0; min-width: 0; padding-left: 10px; padding-right: 10px; }
