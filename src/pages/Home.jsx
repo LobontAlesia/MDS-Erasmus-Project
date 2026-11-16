@@ -1,18 +1,15 @@
-import { MISSIONS, MAX_XP } from '../data.js';
+import { MISSIONS, MAX_XP, ROLES } from '../data.js';
 import { useApp } from '../App.jsx';
 import Icon from '../components/Icon.jsx';
 import MissionList from '../components/MissionList.jsx';
-
-const ROLES = [
-  { role: 'Developer', icon: 'code', text: 'Practice collaboration, estimation and daily Scrum habits.' },
-  { role: 'Scrum Master', icon: 'users', text: 'Explore facilitation, team motivation and risks of gamification.' },
-];
+import RouteNote from '../components/RouteNote.jsx';
 
 /** Hero board: done missions in Done, the next one in Doing, the rest in To do. */
 function SprintBoard() {
   const { d } = useApp();
   const cols = { todo: [], doing: [], done: [] };
-  MISSIONS.forEach((m, i) => {
+  d.order.forEach((i) => {
+    const m = MISSIONS[i];
     const done = d.completed[i];
     const col = done ? 'done' : i === d.nextIndex ? 'doing' : 'todo';
     cols[col].push(<div key={m.page} className={`mini c${i} ${done ? 'done' : ''}`}>{m.short}</div>);
@@ -70,10 +67,10 @@ export default function Home() {
       </div>
       <div className="roles">
         {ROLES.map((r) => (
-          <button key={r.role} className="role" aria-pressed={progress.role === r.role} onClick={() => actions.chooseRole(r.role)}>
+          <button key={r.id} className="role" aria-pressed={progress.role === r.id} onClick={() => actions.chooseRole(r.id)}>
             <span className="icon" aria-hidden="true"><Icon name={r.icon} /></span>
             <span>
-              <strong>I'm a {r.role} <span className="arrow" aria-hidden="true">→</span></strong>
+              <strong>I'm a {r.id} <span className="arrow" aria-hidden="true">→</span></strong>
               <small>{r.text}</small>
             </span>
           </button>
@@ -84,6 +81,7 @@ export default function Home() {
         <h2>Learning missions</h2>
         <button className="button ghost" onClick={() => go('missions')}>All missions <span className="arrow" aria-hidden="true">→</span></button>
       </div>
+      <RouteNote />
       <MissionList id="homeMissions" headingLevel="h3" />
     </section>
   );
