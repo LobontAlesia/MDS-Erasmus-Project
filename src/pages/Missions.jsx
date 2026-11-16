@@ -30,7 +30,14 @@ export default function Missions() {
               return (
               <p key={i} className={`small checklist-item ${done ? 'done' : ''}`}>
                 <span className="dot" aria-hidden="true">{done && <Icon name="check" />}</span>
-                Mission {i + 1}: {done ? 'complete' : i === d.nextIndex && d.role ? 'recommended next' : 'not started'}
+                Mission {i + 1}:{' '}
+                {done
+                  ? 'complete'
+                  : d.perMission[i] > 0
+                    ? `in progress (${d.perMission[i]}%)`
+                    : i === d.nextIndex && d.role
+                      ? 'recommended next'
+                      : 'not started'}
               </p>
               );
             })}
