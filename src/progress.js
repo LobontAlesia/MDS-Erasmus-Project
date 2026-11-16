@@ -1,20 +1,75 @@
 import { useEffect, useState } from 'react';
-import { STORAGE_KEY, MAX_XP, QUESTIONS, PRACTICES, MISSIONS, ROLES } from './data.js';
+import { STORAGE_KEY, MAX_XP, QUESTIONS, PRACTICES, MISSIONS, ROLES, QUIZ_XP_BY_ATTEMPT, LEGACY_QUESTION_IDS } from './data.js';
+import { restoreQuizChallenge, getQuizStars } from './quiz.js';
 
-export const emptyProgress = () => ({ role: null, done: {}, opened: [], correct: [] });
+export const emptyProgress = () => ({
+  role: null, done: {}, opened: [], correct: [], quizAttempts: {}, quizXp: {},
+  quizAnswers: {}, quizChallenge: null,
+});
 
-function load() {
+const questionId = (id) => Object.hasOwn(LEGACY_QUESTION_IDS, id) ? LEGACY_QUESTION_IDS[id] : id;
+
+function migrateQuizMap(saved) {
+  const result = { ...saved };
+  for (const [index, id] of Object.entries(LEGACY_QUESTION_IDS)) {
+    if (Object.hasOwn(result, index)) {
+      result[id] ??= result[index]; // A stable-ID entry is authoritative, including 0 XP.
+      delete result[index];
+    }
+  }
+  return result;
+}
+
+export function loadProgress() {
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
-    return { ...emptyProgress(), ...saved };
+    const progress = {
+      ...emptyProgress(), ...saved,
+      correct: [...new Set((saved.correct ?? []).map(questionId))],
+      quizAttempts: migrateQuizMap(saved.quizAttempts),
+      quizXp: migrateQuizMap(saved.quizXp),
+      quizAnswers: migrateQuizMap(saved.quizAnswers),
+      quizChallenge: restoreQuizChallenge(saved.quizChallenge),
+    };
+    // Sprint 1 completions earned 10 XP; keep that reward under the same storage key.
+    for (const q of progress.correct) {
+      progress.quizAttempts[q] ??= 1;
+      progress.quizXp[q] ??= QUIZ_XP_BY_ATTEMPT[0];
+    }
+    return progress;
   } catch {
     return emptyProgress();
   }
 }
 
+/** Record each submitted answer once; completed questions are locked. */
+export function recordQuizAnswer(progress, id, optionIndex) {
+  const question = QUESTIONS.find((q) => q.id === id);
+  if (!question || !Number.isInteger(optionIndex) || !question.a[optionIndex]
+    || progress.correct.includes(id)) return progress;
+
+  const attempts = (progress.quizAttempts?.[id] ?? 0) + 1;
+  const next = {
+    ...progress,
+    quizAttempts: { ...progress.quizAttempts, [id]: attempts },
+    quizAnswers: { ...progress.quizAnswers, [id]: optionIndex },
+  };
+  if (optionIndex === question.correct) {
+    next.correct = [...progress.correct, id];
+    next.quizXp = { ...progress.quizXp, [id]: QUIZ_XP_BY_ATTEMPT[attempts - 1] ?? 0 };
+  }
+  return next;
+}
+
+export function moveQuizQuestion(progress, id) {
+  const challenge = progress.quizChallenge;
+  if (!challenge || !challenge.questionOrder.includes(id) || challenge.currentQuestionId === id) return progress;
+  return { ...progress, quizChallenge: { ...challenge, currentQuestionId: id } };
+}
+
 /** Progress state, saved to localStorage on every change (US-13). */
 export function useProgress() {
-  const [progress, setProgress] = useState(load);
+  const [progress, setProgress] = useState(loadProgress);
 
   useEffect(() => {
     // localStorage can throw (private mode, storage full): progress just won't persist
@@ -43,11 +98,22 @@ function missionOrder(role) {
 export function derive(p) {
   const role = findRole(p.role);
   const order = missionOrder(role);
-  const xp = (p.done.intro ? 10 : 0) + (p.done.risks ? 10 : 0) + p.opened.length * 5 + p.correct.length * 10;
-  const completed = [!!p.done.intro, p.opened.length === PRACTICES.length, p.correct.length === QUESTIONS.length, !!p.done.risks];
+  const correct = new Set(p.correct.map(questionId));
+  const solved = QUESTIONS.filter((q) => correct.has(q.id));
+  const rewards = migrateQuizMap(p.quizXp);
+  const quizXp = solved.reduce((total, q) => total + (rewards[q.id] ?? QUIZ_XP_BY_ATTEMPT[0]), 0);
+  const quizMaxXp = QUESTIONS.length * QUIZ_XP_BY_ATTEMPT[0];
+  const attempts = migrateQuizMap(p.quizAttempts);
+  const xp = (p.done.intro ? 10 : 0) + (p.done.risks ? 10 : 0) + p.opened.length * 5 + quizXp;
+  const completed = [!!p.done.intro, p.opened.length === PRACTICES.length, solved.length === QUESTIONS.length, !!p.done.risks];
   const level = xp >= 40 ? 2 : 1;
   return {
     xp,
+    quizXp,
+    quizMaxXp,
+    quizAttempts: QUESTIONS.reduce((total, q) => total + (attempts[q.id] ?? 0), 0),
+    quizStars: completed[2] ? getQuizStars(quizXp, quizMaxXp) : 0,
+    quizCorrectCount: solved.length,
     percent: Math.min(100, Math.round((xp / MAX_XP) * 100)),
     completed,
     badges: completed, // one badge per completed mission
@@ -60,7 +126,7 @@ export function derive(p) {
     perMission: [
       p.done.intro ? 100 : 0,
       Math.round((p.opened.length / PRACTICES.length) * 100),
-      Math.round((p.correct.length / QUESTIONS.length) * 100),
+      Math.round((solved.length / QUESTIONS.length) * 100),
       p.done.risks ? 100 : 0,
     ],
   };
