@@ -26,6 +26,27 @@ export const MISSIONS = [
   { title: 'When gamification backfires', short: 'When it backfires', desc: 'Discover potential risks and how to avoid them.', page: 'risks', xp: 10 },
 ];
 
+/* Roles (US-03). `id` is what gets saved in progress, so keep it stable.
+   `route` is the recommended mission order (MISSIONS `page` values); any
+   mission left out is appended at the end, so nothing ever disappears.
+   `why` is the one line shown next to the route. */
+export const ROLES = [
+  {
+    id: 'Developer',
+    icon: 'code',
+    text: 'Practice collaboration, estimation and daily Scrum habits.',
+    route: ['lesson1', 'lesson2', 'quiz', 'risks'],
+    why: 'Build the basics, then practise the sprint habits you use every day before testing yourself.',
+  },
+  {
+    id: 'Scrum Master',
+    icon: 'users',
+    text: 'Explore facilitation, team motivation and risks of gamification.',
+    route: ['lesson1', 'risks', 'lesson2', 'quiz'],
+    why: 'As a facilitator you should know where gamification backfires before you bring practices to the team.',
+  },
+];
+
 export const PRACTICES = [
   { title: 'Planning Poker', tag: 'Sprint Planning', text: 'Estimate stories with cards to discuss effort and uncertainty.' },
   { title: 'Speed Boat retro', tag: 'Retrospective', text: 'Invite everyone to identify what moves the team forward and what holds it back.' },

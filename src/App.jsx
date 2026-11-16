@@ -60,7 +60,11 @@ export default function App() {
     chooseRole(role) {
       setProgress((p) => ({ ...p, role }));
       go('missions');
-      notify(`${role} path selected`);
+      notify(`${role} route selected`);
+    },
+    clearRole() {
+      setProgress((p) => ({ ...p, role: null }));
+      notify('Role cleared');
     },
     complete(key) {
       if (progress.done[key]) return;
