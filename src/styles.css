@@ -550,6 +550,31 @@ h2.card-title { font-size: 22px; margin: 1em 0 .7em; }
 .practice .cta { font-size: 14px; font-weight: 700; color: var(--accent); text-decoration: underline; text-underline-offset: 4px; }
 .practice.opened .cta { color: var(--green); text-decoration: none; font-family: var(--hand); font-size: 17px; }
 
+/* Expandable practice cards (US-08): the header is a button, details sit outside it */
+.practice-toggle {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.practice.expanded .cta { color: var(--accent); font-family: inherit; font-size: 14px; text-decoration: underline; }
+.practice-details { margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--line-strong); }
+.practice-details[hidden] { display: none; }
+.practice-details p { margin: 4px 0 14px; font-size: 15px; line-height: 1.55; color: var(--text); }
+.practice-label { display: block; font-size: 13px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--ink); }
+.practice-sources { margin: 4px 0 0; padding-left: 18px; font-size: 14px; line-height: 1.5; color: var(--muted); }
+.practice-sources li + li { margin-top: 6px; }
+.practice-sources a { color: var(--accent); overflow-wrap: anywhere; }
+@media (prefers-reduced-motion: no-preference) {
+  .practice-details:not([hidden]) { animation: practice-open .2s ease-out; }
+}
+@keyframes practice-open { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
 /* ---------- Quiz ---------- */
 
 .question { margin-top: 26px; padding: 30px; }
