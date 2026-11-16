@@ -1,6 +1,7 @@
 /* All content of Sprint Quest in one place. */
 
 export const STORAGE_KEY = 'sprintquest-progress-v1';
+export const QUIZ_XP_BY_ATTEMPT = [10, 5]; // Third and later attempts earn 0 XP.
 
 // Pages reachable from the top navigation (label shown in the nav bar)
 export const NAV = { home: 'Home', missions: 'Missions', dashboard: 'Dashboard', poker: 'Planning Poker', bot: 'Agile Bot' };
@@ -18,13 +19,6 @@ export const PAGES = {
   bot: 'Agile Bot',
 };
 export const MISSION_PAGES = ['lesson1', 'lesson2', 'quiz', 'risks'];
-
-export const MISSIONS = [
-  { title: 'What is gamification?', short: 'What is gamification?', desc: 'Learn what gamification means and its core elements.', page: 'lesson1', xp: 10 },
-  { title: 'Gamified practices in a sprint', short: 'Sprint practices', desc: 'Explore Planning Poker, retrospectives, sprint tracking and team badges.', page: 'lesson2', xp: 20 },
-  { title: 'Quiz: Test your knowledge', short: 'Quiz', desc: 'Answer three multiple-choice questions.', page: 'quiz', xp: 30 },
-  { title: 'When gamification backfires', short: 'When it backfires', desc: 'Discover potential risks and how to avoid them.', page: 'risks', xp: 10 },
-];
 
 /* Roles (US-03). `id` is what gets saved in progress, so keep it stable.
    `route` is the recommended mission order (MISSIONS `page` values); any
@@ -54,25 +48,93 @@ export const PRACTICES = [
   { title: 'Team badges', tag: 'Definition of Done', text: 'Celebrate shared milestones rather than rewarding individuals only.' },
 ];
 
+// Fixed mapping for Sprint 1 / Task 1 saves. Do not change when reordering the bank.
+export const LEGACY_QUESTION_IDS = Object.freeze({
+  0: 'gamification-basics',
+  1: 'planning-poker',
+  2: 'competition-risk',
+});
+
+// Answers keep their canonical indices as identifiers; only their display order is shuffled.
+// Scrum / Agile content: https://scrumguides.org/scrum-guide.html and https://agilemanifesto.org/
 export const QUESTIONS = [
   {
+    id: LEGACY_QUESTION_IDS[0],
     q: 'What does gamification mean?',
     a: ['Building a video game for the team', 'Using game design elements in non-game contexts', 'Playing games during sprint breaks'],
     correct: 1,
     why: 'Gamification applies game-design elements to activities that are not games.',
   },
   {
+    id: LEGACY_QUESTION_IDS[1],
     q: 'Which activity is useful for estimating Scrum user stories?',
     a: ['Planning Poker', 'A personal leaderboard', 'Randomly assigning points'],
     correct: 0,
     why: 'Planning Poker uses estimation cards and discussion to compare effort and uncertainty.',
   },
   {
+    id: LEGACY_QUESTION_IDS[2],
     q: 'What is a potential risk of gamification?',
     a: ['Better visibility of progress', 'Unhealthy competition between teammates', 'More opportunities for feedback'],
     correct: 1,
     why: 'Individual competition can distract from Scrum’s emphasis on teamwork.',
   },
+  {
+    id: 'scrum-fundamentals',
+    q: 'How does Scrum help a team learn and adapt?',
+    a: ['By fixing every requirement before work begins', 'By relying on one final review at the end of the project', 'By making work transparent, inspecting results and adapting regularly'],
+    correct: 2,
+    why: 'Scrum uses transparency, inspection and adaptation so teams can make decisions based on what they observe.',
+  },
+  {
+    id: 'sprint-planning',
+    q: 'What should the Scrum Team establish during Sprint Planning?',
+    a: ['A Sprint Goal, selected work and a plan for delivering it', 'A ranking of individual team members', 'A fixed plan for every future Sprint'],
+    correct: 0,
+    why: 'Sprint Planning explores why the Sprint is valuable, what can be done and how the selected work will be delivered.',
+  },
+  {
+    id: 'agile-values',
+    q: 'A customer learns that a requirement needs to change. Which response best reflects Agile values?',
+    a: ['Reject the feedback because a plan already exists', 'Discuss the feedback and adapt the plan to improve value', 'Accept the change without discussing its impact', 'Stop planning altogether'],
+    correct: 1,
+    why: 'Agile values responding to change while still recognizing the value of planning. Collaboration helps the team understand the impact.',
+  },
+  {
+    id: 'sprint-retrospective',
+    q: 'What is the main purpose of a Sprint Retrospective?',
+    a: ['Assign blame for work that was not finished', 'Demonstrate the product to customers', 'Inspect how the team worked and identify improvements'],
+    correct: 2,
+    why: 'The Retrospective helps the Scrum Team improve quality and effectiveness by inspecting its interactions, processes and tools.',
+  },
+  {
+    id: 'product-owner',
+    q: 'Which accountability belongs to the Product Owner?',
+    a: ['Maximizing product value and ensuring effective Product Backlog management', 'Assigning every daily task to a developer', 'Deciding how developers implement each feature'],
+    correct: 0,
+    why: 'The Product Owner is accountable for product value and effective Product Backlog management, including ordering its items.',
+  },
+  {
+    id: 'scrum-master',
+    q: 'How does a Scrum Master support the Scrum Team?',
+    a: ['By acting as the boss who assigns all work', 'By coaching Scrum practices and helping remove impediments', 'By taking over the Product Owner’s backlog decisions'],
+    correct: 1,
+    why: 'The Scrum Master helps establish Scrum and improves team effectiveness through coaching, support and removal of impediments.',
+  },
+  {
+    id: 'team-collaboration',
+    q: 'A teammate is blocked on work needed for the Sprint Goal. What best supports collaboration?',
+    a: ['Keep useful knowledge private to protect your ranking', 'Ignore the problem because your own tasks are finished', 'Wait until the end of the Sprint to mention it', 'Share knowledge and work together to remove the blocker'],
+    correct: 3,
+    why: 'Supporting teammates and sharing knowledge helps the team work toward its shared Sprint Goal rather than individual scores.',
+  },
+];
+
+export const MISSIONS = [
+  { title: 'What is gamification?', short: 'What is gamification?', desc: 'Learn what gamification means and its core elements.', page: 'lesson1', xp: 10 },
+  { title: 'Gamified practices in a sprint', short: 'Sprint practices', desc: 'Explore Planning Poker, retrospectives, sprint tracking and team badges.', page: 'lesson2', xp: 20 },
+  { title: 'Quiz: Test your knowledge', short: 'Quiz', desc: `Answer ${QUESTIONS.length} multiple-choice questions.`, page: 'quiz', xp: QUESTIONS.length * QUIZ_XP_BY_ATTEMPT[0] },
+  { title: 'When gamification backfires', short: 'When it backfires', desc: 'Discover potential risks and how to avoid them.', page: 'risks', xp: 10 },
 ];
 
 export const BADGES = [
@@ -84,7 +146,7 @@ export const BADGES = [
 
 export const ESTIMATES = [1, 2, 3, 5, 8, 13, 21, '?'];
 
-export const MAX_XP = 70;
+export const MAX_XP = 10 + 10 + PRACTICES.length * 5 + QUESTIONS.length * QUIZ_XP_BY_ATTEMPT[0];
 
 /* Agile Bot: placeholder answers until BOTSchool.ai is connected (US-14) */
 export const BOT_SUGGESTIONS = [

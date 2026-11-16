@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { PAGES } from './data.js';
-import { useProgress, derive, emptyProgress } from './progress.js';
+import { useProgress, derive, emptyProgress, recordQuizAnswer, moveQuizQuestion } from './progress.js';
+import { createQuizChallenge } from './quiz.js';
 import Nav from './components/Nav.jsx';
 import Home from './pages/Home.jsx';
 import Missions from './pages/Missions.jsx';
@@ -47,6 +48,7 @@ export default function App() {
   const toastTimer = useRef();
   const mainRef = useRef(null);
   const firstRender = useRef(true);
+  const previousCorrect = useRef(progress.correct);
   const d = derive(progress);
 
   const notify = useCallback((text) => {
@@ -55,8 +57,23 @@ export default function App() {
     toastTimer.current = setTimeout(() => setToast((t) => ({ ...t, show: false })), 2400);
   }, []);
 
+  // Notify after the state update, so rapid submissions use the actual saved reward.
+  useEffect(() => {
+    for (const q of progress.correct) {
+      if (!previousCorrect.current.includes(q)) notify(`Correct! +${progress.quizXp[q]} XP`);
+    }
+    previousCorrect.current = progress.correct;
+  }, [progress.correct, progress.quizXp, notify]);
+
+  const startQuiz = useCallback(() => {
+    // Prepare randomness outside the state updater (which React may invoke twice).
+    const challenge = createQuizChallenge();
+    setProgress((p) => p.quizChallenge ? p : { ...p, quizChallenge: challenge });
+  }, [setProgress]);
+
   /* ---------- Actions ---------- */
   const actions = {
+    startQuiz,
     chooseRole(role) {
       setProgress((p) => ({ ...p, role }));
       go('missions');
@@ -76,10 +93,11 @@ export default function App() {
       setProgress((p) => ({ ...p, opened: [...p.opened, i] }));
       notify('+5 XP');
     },
-    answerCorrect(q) {
-      if (progress.correct.includes(q)) return;
-      setProgress((p) => ({ ...p, correct: [...p.correct, q] }));
-      notify('Correct! +10 XP');
+    answerQuestion(q, option) {
+      setProgress((p) => recordQuizAnswer(p, q, option));
+    },
+    moveQuizQuestion(q) {
+      setProgress((p) => moveQuizQuestion(p, q));
     },
     reset() {
       if (!window.confirm('Reset all progress and badges?')) return;
