@@ -3,6 +3,7 @@ import { useApp } from '../App.jsx';
 import Icon from '../components/Icon.jsx';
 import MissionList from '../components/MissionList.jsx';
 import RouteNote from '../components/RouteNote.jsx';
+import LevelProgress from '../components/LevelProgress.jsx';
 
 /** Hero board: done missions in Done, the next one in Doing, the rest in To do. */
 function SprintBoard() {
@@ -35,6 +36,7 @@ function SprintBoard() {
             <span className="small">Level {d.level} · {d.levelTitle}</span>
             <span className="small">{badgeCount} of 4 badges</span>
           </div>
+          <LevelProgress progress={d} />
         </div>
       </div>
     </div>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { STORAGE_KEY, MAX_XP, QUESTIONS, PRACTICES, MISSIONS, ROLES, QUIZ_XP_BY_ATTEMPT, LEGACY_QUESTION_IDS } from './data.js';
 import { restoreQuizChallenge, getQuizStars } from './quiz.js';
+import { getLevelProgress } from './levels.js';
 
 export const emptyProgress = () => ({
   role: null, done: {}, opened: [], correct: [], quizAttempts: {}, quizXp: {},
@@ -67,6 +68,17 @@ export function moveQuizQuestion(progress, id) {
   return { ...progress, quizChallenge: { ...challenge, currentQuestionId: id } };
 }
 
+/** Functional updates keep repeated/queued mission actions from granting extra XP. */
+export function recordMissionCompletion(progress, key) {
+  if (!['intro', 'risks'].includes(key) || progress.done[key]) return progress;
+  return { ...progress, done: { ...progress.done, [key]: true } };
+}
+
+export function recordPracticeOpen(progress, index) {
+  if (!Number.isInteger(index) || !PRACTICES[index] || progress.opened.includes(index)) return progress;
+  return { ...progress, opened: [...progress.opened, index] };
+}
+
 /** Progress state, saved to localStorage on every change (US-13). */
 export function useProgress() {
   const [progress, setProgress] = useState(loadProgress);
@@ -106,7 +118,6 @@ export function derive(p) {
   const attempts = migrateQuizMap(p.quizAttempts);
   const xp = (p.done.intro ? 10 : 0) + (p.done.risks ? 10 : 0) + p.opened.length * 5 + quizXp;
   const completed = [!!p.done.intro, p.opened.length === PRACTICES.length, solved.length === QUESTIONS.length, !!p.done.risks];
-  const level = xp >= 40 ? 2 : 1;
   return {
     xp,
     quizXp,
@@ -121,8 +132,7 @@ export function derive(p) {
     role, // ROLES entry or null
     order, // mission indices in display order (role route or default)
     nextIndex: order.find((i) => !completed[i]) ?? -1, // first unfinished mission on the route, -1 when all done
-    level,
-    levelTitle: level === 1 ? 'Rookie' : 'Apprentice',
+    ...getLevelProgress(xp),
     perMission: [
       p.done.intro ? 100 : 0,
       Math.round((p.opened.length / PRACTICES.length) * 100),

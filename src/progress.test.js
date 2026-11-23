@@ -161,8 +161,8 @@ test('maximum XP and existing mission progression remain consistent', () => {
   assert.equal(MAX_XP, 140);
   assert.equal(d.xp, MAX_XP);
   assert.equal(d.percent, 100);
-  assert.equal(d.level, 2);
-  assert.equal(d.levelTitle, 'Apprentice');
+  assert.equal(d.level, 5);
+  assert.equal(d.levelTitle, 'Scrum Pro');
   assert.equal(d.doneCount, 4);
   assert.equal(d.nextIndex, -1);
   assert.deepEqual(d.perMission, [100, 100, 100, 100]);
