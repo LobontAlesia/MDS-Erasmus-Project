@@ -20,7 +20,9 @@ export default function Nav() {
           ))}
         </div>
         <span className="xp-pill"><Icon name="star" /> {d.xp} XP</span>
-        <span className="level-pill">Level {d.level}</span>
+        <span className="level-pill" role="group" aria-label={`Level ${d.level} · ${d.levelTitle}`} title={d.levelTitle}>
+          <span>Level {d.level}</span><span className="level-title">{d.levelTitle}</span>
+        </span>
       </div>
     </nav>
   );

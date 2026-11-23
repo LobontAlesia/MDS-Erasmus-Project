@@ -239,6 +239,79 @@ try {
   assert.deepEqual(reset.quizAttempts, {}); assert.deepEqual(reset.quizXp, {}); assert.deepEqual(reset.quizAnswers, {});
   await navigate();
   assert.equal(await evaluate("document.querySelectorAll('.quiz-victory').length"), 0);
+
+  // US-11: render saved levels consistently without replaying level-up feedback.
+  function progressAtXp(xp) {
+    let progress = emptyProgress();
+    let remaining = xp;
+    if (xp > 100) {
+      progress = { ...progress, done: { intro: true, risks: true }, opened: [0, 1, 2, 3] };
+      remaining -= 40;
+    }
+    for (const q of QUESTIONS) {
+      if (!remaining) break;
+      if (remaining === 5) progress = recordQuizAnswer(progress, q.id, (q.correct + 1) % q.a.length);
+      progress = recordQuizAnswer(progress, q.id, q.correct);
+      remaining -= progress.quizXp[q.id];
+    }
+    assert.equal(derive(progress).xp, xp);
+    return progress;
+  }
+  async function seedProgress(progress) {
+    await evaluate(`localStorage.setItem(${JSON.stringify(STORAGE_KEY)}, ${JSON.stringify(JSON.stringify(progress))})`);
+  }
+  for (const [xp, level, title] of [[0, 1, 'Rookie'], [25, 2, 'Agile Explorer'],
+    [55, 3, 'Sprinter'], [90, 4, 'Sprint Strategist'], [125, 5, 'Scrum Pro'], [140, 5, 'Scrum Pro']]) {
+    const saved = progressAtXp(xp);
+    await seedProgress(saved);
+    await navigate('home');
+    assert.equal(await evaluate("document.querySelector('.level-pill').getAttribute('aria-label')"), `Level ${level} · ${title}`);
+    assert.equal(await evaluate("document.querySelector('.level-up-notice [role=status]').textContent"), '');
+    assert.ok(await evaluate(`document.querySelector('.board-foot').textContent.includes(${JSON.stringify(`Level ${level} · ${title}`)})`));
+    const expected = xp >= 125 ? 'Maximum level reached' : `${derive(saved).xpToNextLevel} XP to Level ${level + 1}`;
+    for (const page of ['home', 'dashboard']) {
+      await route(page);
+      assert.ok(await evaluate(`document.querySelector('#${page} .level-progress').textContent.includes(${JSON.stringify(expected)})`));
+      assert.equal(await evaluate(`document.querySelector('#${page} [aria-label="Level progress"]').getAttribute('aria-valuenow')`), String(Math.round(derive(saved).levelPercent)));
+      for (const width of [1440, 1024, 768, 375, 320]) await viewport(width);
+      if (xp === 90 || xp === 125) {
+        await viewport(375, 844); await screenshot(`level-${level}-${page}-mobile.png`);
+        await viewport(1440); await screenshot(`level-${level}-${page}-desktop.png`);
+      }
+    }
+    assert.deepEqual(await readProgress(), saved);
+  }
+  console.log('PASS all five saved levels on Header, Home and Dashboard, next-level progress, maximum level and responsive layout');
+
+  // A real reward crosses 25 XP. Repeated clicks and notification dismissal add no XP.
+  await seedProgress({ ...emptyProgress(), done: { intro: true, risks: true } });
+  await navigate('lesson2');
+  await evaluate("{ const button = document.querySelector('.practice-toggle'); for (let i = 0; i < 20; i++) button.click(); }");
+  await waitFor("document.querySelector('.level-up-notice [role=status]').textContent.includes('Level 2')");
+  assert.equal(derive(await readProgress()).xp, 25);
+  assert.deepEqual((await readProgress()).opened, [0]);
+  assert.equal(await evaluate("document.querySelector('.level-up-notice [role=status]').getAttribute('aria-live')"), 'polite');
+  assert.equal(await evaluate("document.querySelector('.level-up-notice [role=status]').getAttribute('aria-atomic')"), 'true');
+  const dismiss = '.level-up-notice button';
+  await evaluate(`document.querySelector(${JSON.stringify(dismiss)}).focus()`);
+  await send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Enter', code: 'Enter', text: '\r', unmodifiedText: '\r', windowsVirtualKeyCode: 13 });
+  await send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 });
+  await waitFor("document.querySelector('.level-up-notice [role=status]').textContent === ''");
+  await click('.practice-toggle');
+  assert.equal(derive(await readProgress()).xp, 25);
+  await route('dashboard'); await route('home');
+  assert.equal(await evaluate("document.querySelector('.level-up-notice [role=status]').textContent"), '');
+  await navigate('dashboard');
+  assert.equal(await evaluate("document.querySelector('.level-up-notice [role=status]').textContent"), '');
+  // Planning Poker is still a practice exercise, with no new XP reward.
+  const beforePoker = await readProgress();
+  await route('poker'); await click('.estimate-buttons button'); await click('#poker .card > .button');
+  assert.deepEqual(await readProgress(), beforePoker);
+  await route('dashboard'); await click('#dashboard .button.ghost');
+  await waitFor(`${storage}.correct.length === 0 && ${storage}.opened.length === 0`);
+  assert.equal(await evaluate("document.querySelector('.level-up-notice [role=status]').textContent"), '');
+  assert.equal(await evaluate("document.querySelector('.level-pill').getAttribute('aria-label')"), 'Level 1 · Rookie');
+  console.log('PASS accessible level-up feedback, keyboard dismissal, repeated practice clicks, no reload replay, reset and unchanged Planning Poker XP');
   assert.deepEqual(runtimeErrors, []);
   console.log('PASS zero-XP victory, reset and no browser JavaScript exceptions');
   console.log(`Screenshots: ${artifacts}`);

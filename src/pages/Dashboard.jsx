@@ -1,13 +1,14 @@
 import { BADGES } from '../data.js';
 import { useApp } from '../App.jsx';
 import Icon from '../components/Icon.jsx';
+import LevelProgress from '../components/LevelProgress.jsx';
 
 export default function Dashboard() {
   const { go, d, actions } = useApp();
   const badgeCount = d.badges.filter(Boolean).length;
 
   const stats = [
-    { icon: 'trophy', label: 'Your level', value: `Level ${d.level}`, foot: <span className="small">{d.levelTitle}</span> },
+    { icon: 'trophy', label: 'Your level', value: `Level ${d.level}`, foot: <><span className="small">{d.levelTitle}</span><LevelProgress progress={d} /></> },
     { icon: 'star', label: 'Total XP', value: `${d.xp} XP`, foot: <div className="bar"><span style={{ width: `${d.percent}%` }} /></div> },
     { icon: 'target', label: 'Missions completed', value: `${d.doneCount} / 4`, foot: <span className="small">Keep going</span> },
     { icon: 'medal', label: 'Badges unlocked', value: `${badgeCount} / 4`, foot: <span className="small">Collect all four</span> },

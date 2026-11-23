@@ -1,8 +1,9 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { PAGES } from './data.js';
-import { useProgress, derive, emptyProgress, recordQuizAnswer, moveQuizQuestion } from './progress.js';
+import { useProgress, derive, emptyProgress, recordQuizAnswer, moveQuizQuestion, recordMissionCompletion, recordPracticeOpen } from './progress.js';
 import { createQuizChallenge } from './quiz.js';
 import Nav from './components/Nav.jsx';
+import LevelUpNotice from './components/LevelUpNotice.jsx';
 import Home from './pages/Home.jsx';
 import Missions from './pages/Missions.jsx';
 import Lesson1 from './pages/Lesson1.jsx';
@@ -85,12 +86,12 @@ export default function App() {
     },
     complete(key) {
       if (progress.done[key]) return;
-      setProgress((p) => ({ ...p, done: { ...p.done, [key]: true } }));
+      setProgress((p) => recordMissionCompletion(p, key));
       notify('+10 XP, nice!');
     },
     openPractice(i) {
       if (progress.opened.includes(i)) return;
-      setProgress((p) => ({ ...p, opened: [...p.opened, i] }));
+      setProgress((p) => recordPracticeOpen(p, i));
       notify('+5 XP');
     },
     answerQuestion(q, option) {
@@ -136,6 +137,7 @@ export default function App() {
       <a className="skip-link" href="#main" onClick={focusMain}>Skip to content</a>
       <Nav />
       <main className="container" id="main" tabIndex={-1} ref={mainRef}>
+        <LevelUpNotice level={d.level} title={d.levelTitle} />
         <Screen key={page} />
       </main>
       <div className={`toast ${toast.show ? 'show' : ''}`} role="status" aria-live="polite">{toast.text}</div>

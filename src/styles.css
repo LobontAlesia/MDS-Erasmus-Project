@@ -190,7 +190,16 @@ nav {
   box-shadow: 1px 2px 0 rgba(0, 0, 0, .12);
 }
 .xp-pill .icon-svg { fill: currentColor; stroke-width: 1; }
-.level-pill { font-family: var(--hand); font-size: 17px; color: var(--ink); white-space: nowrap; font-weight: 700; }
+.level-pill { display: flex; flex-direction: column; font-family: var(--hand); font-size: 17px; color: var(--ink); white-space: nowrap; font-weight: 700; }
+.level-title { font-family: var(--sans); font-size: 11px; }
+.level-progress { margin-top: 10px; }
+.level-progress .small { display: block; overflow-wrap: anywhere; }
+.level-progress .bar { margin-top: 8px; }
+.level-up-notice.is-visible {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  flex-wrap: wrap; margin-bottom: 20px; padding: 12px 16px;
+  border: 2px solid var(--accent); background: var(--note-yellow); font-weight: 700;
+}
 
 /* ---------- Layout ---------- */
 
@@ -701,6 +710,7 @@ h2.card-title { font-size: 22px; margin: 1em 0 .7em; }
 }
 
 @media (max-width: 850px) {
+  .level-title { display: none; }
   .navinner { flex-wrap: wrap; gap: 6px 10px; padding: 10px 15px 6px; }
   .brand { margin-right: auto; }
   /* flex-basis 100% (not just width:100%) so the links really get their own row */
